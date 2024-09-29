@@ -15,8 +15,8 @@ export const addUser = asyncHandler(async (req, res) => {
       });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // const salt = await bcrypt.genSalt(10);
+    // const hashedPassword = await bcrypt.hash(password, salt);
 
     const user = await User.create({
       username,
@@ -43,6 +43,7 @@ export const addUser = asyncHandler(async (req, res) => {
     return res.status(500).json({ success: false, msg: "Server Error", error });
   }
 });
+
 function generateSecureNumericOTP(length) {
   length = 4;
 
