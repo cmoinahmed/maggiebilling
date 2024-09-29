@@ -20,7 +20,7 @@ export const addUser = asyncHandler(async (req, res) => {
 
     const user = await User.create({
       username,
-      password: hashedPassword,
+      password,
       email,
       phone,
       role: role || "STAFF",
