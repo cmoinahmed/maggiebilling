@@ -40,34 +40,19 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-const SALT_ROUNDS = 10;
-
 userSchema.pre("save", async function (next) {
-  // Only hash the password if it has been modified or is new
+  this.dateModified = new Date();
   if (!this.isModified("password")) {
-    return next();
+    next();
   }
-
-  // Check if the password is already hashed (hashed passwords usually start with $2a$ or $2b$)
-  if (this.password.startsWith("$2a$") || this.password.startsWith("$2b$")) {
-    return next(); // Skip re-hashing if it's already hashed
-  }
-
-  console.log("Password before hashing: ", this.password);
-  const salt = await bcrypt.genSalt(SALT_ROUNDS); // Use a constant for salt rounds
+  const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-  console.log("Password after hashing: ", this.password);
-
-  next();
 });
 
 userSchema.methods.matchPassword = async function (enteredPassword) {
-  const isMatch = await bcrypt.compare(enteredPassword, this.password);
-  console.log(`Entered Password: ${enteredPassword}`);
-  console.log(`Stored Password: ${this.password}`);
-  console.log(`Password Match: ${isMatch}`);
-  return isMatch;
+  return await bcrypt.compare(enteredPassword, this.password);
 };
+
 const User = mongoose.model("users", userSchema);
 
 export default User;

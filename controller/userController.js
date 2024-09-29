@@ -67,7 +67,6 @@ export const login = asyncHandler(async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find user by email
     const userDoc = await User.findOne({ email });
 
     if (!userDoc) {
@@ -77,24 +76,17 @@ export const login = asyncHandler(async (req, res) => {
       });
     }
 
-    // Debug: Check hashed password in the database
-    console.log(`Hashed Password in DB: ${userDoc.password}`);
-
-    // Check if password matches
     const isMatch = await userDoc.matchPassword(password);
-    console.log(`Password Match Status: ${isMatch}`);
     if (!isMatch) {
       return res.status(400).json({ success: false, msg: "Invalid password" });
     }
 
-    // Check if user is active
     if (userDoc.status !== "ACTIVE") {
       return res
         .status(400)
         .json({ success: false, msg: "User is not active" });
     }
 
-    // Success response
     return res
       .status(200)
       .json({ userDoc, success: true, msg: "Logged in successfully" });
