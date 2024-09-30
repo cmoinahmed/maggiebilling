@@ -53,3 +53,22 @@ export const calculateBilling = asyncHandler(async (req, res) => {
     });
   }
 });
+
+export const getBillingById = asyncHandler(async (req, res) => {
+  try {
+    const billId = req.params.billId;
+
+    const billDoc = await Billing.findById(billId);
+    if (!billDoc) {
+      console.log("Billing id does not exist");
+      return res
+        .status(404)
+        .json({ success: false, msg: "Billing id not found" });
+    }
+
+    return res.status(200).json({ success: true, billDoc });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, error });
+  }
+});
