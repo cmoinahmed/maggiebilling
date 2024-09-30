@@ -8,6 +8,7 @@ const reqString = {
 const productSchema = new mongoose.Schema({
   name: reqString,
   price: reqString,
+  bannerImg: reqString,
 });
 
 const Product = mongoose.model("products", productSchema);

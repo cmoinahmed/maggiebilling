@@ -216,3 +216,64 @@ export const updateUserStatus = asyncHandler(async (req, res) => {
     });
   }
 });
+
+export const updateUser = asyncHandler(async (req, res) => {
+  try {
+    const { userId, username, email, phone, role } = req.body;
+
+    const existingUser = await User.findById(userId);
+
+    if (!existingUser) {
+      return res.status(404).json({
+        success: false,
+        msg: "Email Id not found",
+      });
+    }
+
+    const userDoc = await User.updateOne(
+      { _id: userId },
+      {
+        username,
+        email,
+        phone,
+        role,
+      }
+    );
+
+    return res
+      .status(200)
+      .json({ success: true, msg: "User updated successfully", userDoc });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, error });
+  }
+});
+
+export const getAllUsers = asyncHandler(async (req, res) => {
+  try {
+    const userDoc = await User.find({});
+    return res.status(200).json({ success: true, userDoc });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: true, error });
+  }
+});
+
+export const getUserById = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const userDoc = await User.findById(userId);
+
+    if (!userDoc) {
+      return res
+        .status(404)
+        .json({ success: false, msg: "User id not found: ", userId });
+    }
+
+    return res.status(200).json({ success: true, userDoc });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, error });
+  }
+});
