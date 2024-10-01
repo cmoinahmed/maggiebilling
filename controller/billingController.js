@@ -123,13 +123,18 @@ export const getAllBillingWithPagination = asyncHandler(async (req, res) => {
 export const getLifetimeEarnings = asyncHandler(async (req, res) => {
   try {
     let totalEarning = 0;
-    const productDoc = await Product.find({});
+    //const productDoc = await Product.find({});
 
-    for (let product of productDoc) {
-      totalEarning += product.grossRevenue;
-    }
+    const productDoc = await Product.aggregate([
+      {
+        $group: {
+          _id: null, // Group by nothing, so all documents are aggregated
+          totalEarnings: { $sum: "$grossRevenue" },
+        },
+      },
+    ]);
 
-    return res.status(200).json({ success: true, totalEarning });
+    return res.status(200).json({ success: true, productDoc });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ success: false, error });
@@ -142,16 +147,21 @@ export const getTotalEarningsBetweenDates = asyncHandler(async (req, res) => {
     const startDate = req.query.startDate;
     const endDate = req.query.endDate;
 
-    const billDoc = await Billing.find({
-      dateModified: { $gte: startDate, $lte: endDate },
-    });
-    console.log(billDoc);
+    const billingDoc = await Billing.aggregate([
+      {
+        $match: {
+          dateModified: { $gte: new Date(startDate), $lte: new Date(endDate) },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalEarnings: { $sum: "$totalPrice" },
+        },
+      },
+    ]);
 
-    for (let bill of billDoc) {
-      totalEarning += bill.totalPrice;
-    }
-
-    return res.status(200).json({ success: true, totalEarning });
+    return res.status(200).json({ success: true, billingDoc });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ success: false, error });

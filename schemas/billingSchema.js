@@ -17,6 +17,7 @@ const billingSchema = new mongoose.Schema({
     },
   ],
   totalPrice: Number,
+  billingDate: { type: Date, default: Date.now },
   dateCreated: { type: Date, default: Date.now },
   dateModified: { type: Date, default: Date.now },
 });
