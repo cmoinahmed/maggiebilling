@@ -135,3 +135,25 @@ export const getLifetimeEarnings = asyncHandler(async (req, res) => {
     return res.status(500).json({ success: false, error });
   }
 });
+
+export const getTotalEarningsBetweenDates = asyncHandler(async (req, res) => {
+  try {
+    let totalEarning = 0;
+    const startDate = req.query.startDate;
+    const endDate = req.query.endDate;
+
+    const billDoc = await Billing.find({
+      dateModified: { $gte: startDate, $lte: endDate },
+    });
+    console.log(billDoc);
+
+    for (let bill of billDoc) {
+      totalEarning += bill.totalPrice;
+    }
+
+    return res.status(200).json({ success: true, totalEarning });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, error });
+  }
+});

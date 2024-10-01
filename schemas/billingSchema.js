@@ -17,6 +17,8 @@ const billingSchema = new mongoose.Schema({
     },
   ],
   totalPrice: Number,
+  dateCreated: { type: Date, default: Date.now },
+  dateModified: { type: Date, default: Date.now },
 });
 
 const Billing = mongoose.model("billings", billingSchema);
