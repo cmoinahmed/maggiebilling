@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { type } from "os";
 
 const reqString = {
   type: String,
@@ -9,6 +10,8 @@ const productSchema = new mongoose.Schema({
   name: reqString,
   price: reqString,
   bannerImg: reqString,
+  productSold: { type: Number, default: 0 },
+  grossRevenue: { type: Number, default: 0 },
 });
 
 const Product = mongoose.model("products", productSchema);

@@ -11,7 +11,7 @@ export const calculateBilling = asyncHandler(async (req, res) => {
     // Loop through each item in the request
     for (const item of items) {
       const product = await Product.findById(item.productId);
-
+      console.log(product);
       if (!product) {
         return res.status(404).json({
           success: false,
@@ -22,6 +22,16 @@ export const calculateBilling = asyncHandler(async (req, res) => {
       // Calculate the price for the current product
       const productPrice = parseFloat(product.price) * item.quantity;
       totalPrice += productPrice;
+
+      //To increament productSold data and calculate gross revenue of the product
+      const productsSold = product.productSold + item.quantity;
+      const grossRevenue = product.grossRevenue + productPrice;
+      const productDoc = await Product.updateOne(
+        { _id: item.productId },
+        { productSold: productsSold, grossRevenue: grossRevenue }
+      );
+
+      console.log(productDoc);
 
       // Push the product reference (ID) and quantity into the bill items array
       billItems.push({
@@ -66,9 +76,46 @@ export const getBillingById = asyncHandler(async (req, res) => {
         .json({ success: false, msg: "Billing id not found" });
     }
 
+    await billDoc.populate("item.product");
+
     return res.status(200).json({ success: true, billDoc });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ success: false, error });
+  }
+});
+
+export const getAllBillingWithPagination = asyncHandler(async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const pageSize = parseInt(req.query.pageSize) || 10;
+    //const sortField = req.query.sortField || "dateCreated";
+    //const sortOrder = req.query.sortOrder || "asc";
+    //const sort = {};
+    //sort[sortField] = sortOrder === "asc" ? 1 : -1;
+    const startIndex = (page - 1) * pageSize;
+    const totalDocuments = await Billing.countDocuments();
+    const totalPages = Math.ceil(totalDocuments / pageSize);
+    const billingDoc = await Billing.find({})
+      //.populate("product")
+      // .sort(sort)
+      .skip(startIndex)
+      .limit(pageSize)
+      .exec();
+    return res.status(200).json({
+      billingDoc,
+      pagination: {
+        page,
+        pageSize,
+        totalPages,
+        totalDocuments,
+        hasNextPage: page < totalPages,
+        hasPrevPage: page > 1,
+      },
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error, success: false });
   }
 });
