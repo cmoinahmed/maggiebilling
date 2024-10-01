@@ -125,7 +125,7 @@ export const getProductSoldCount = asyncHandler(async (req, res) => {
   try {
     const { id } = req.params;
 
-    const productDoc = await Product.findById(id).select("productSold");
+    const productDoc = await Product.findById(id).select("productSold name");
     if (!productDoc) {
       console.log("Product not found");
       return res.status(404).json({ success: false, msg: "Product not found" });
@@ -146,7 +146,7 @@ export const getProductRevenue = asyncHandler(async (req, res) => {
   try {
     const { id } = req.params;
 
-    const productDoc = await Product.findById(id).select("grossRevenue");
+    const productDoc = await Product.findById(id).select("grossRevenue name");
     if (!productDoc) {
       console.log("Product not found");
       return res.status(404).json({ success: false, msg: "Product not found" });

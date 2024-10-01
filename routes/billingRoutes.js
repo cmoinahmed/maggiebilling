@@ -1,9 +1,11 @@
 import express from "express";
 import {
   calculateBilling,
+  fetchBillingReportCSV,
   getAllBillingWithPagination,
   getBillingById,
   getLifetimeEarnings,
+  getTodaysEarnings,
   getTotalEarningsBetweenDates,
 } from "../controller/billingController.js";
 
@@ -17,5 +19,7 @@ billingRouter.route("/getLifetimeEarnings").get(getLifetimeEarnings);
 billingRouter
   .route("/getTotalEarningsBetweenDates")
   .get(getTotalEarningsBetweenDates);
+billingRouter.route("/getTodaysEarnings").get(getTodaysEarnings);
+billingRouter.route("/fetchBillingReportCSV").get(fetchBillingReportCSV);
 
 export default billingRouter;

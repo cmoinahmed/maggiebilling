@@ -1,6 +1,7 @@
 import Billing from "../schemas/billingSchema.js";
 import Product from "../schemas/productSchema.js";
 import asyncHandler from "express-async-handler";
+import { Parser } from "json2csv";
 
 export const calculateBilling = asyncHandler(async (req, res) => {
   try {
@@ -165,5 +166,78 @@ export const getTotalEarningsBetweenDates = asyncHandler(async (req, res) => {
   } catch (error) {
     console.log(error);
     return res.status(500).json({ success: false, error });
+  }
+});
+
+export const getTodaysEarnings = asyncHandler(async (req, res) => {
+  try {
+    const startOfDay = moment().tz("Asia/Kolkata").startOf("day").toDate();
+    const endOfDay = moment().tz("Asia/Kolkata").endOf("day").toDate();
+
+    const result = await Billing.aggregate([
+      {
+        $match: {
+          dateModified: { $gte: startOfDay, $lte: endOfDay },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalEarning: { $sum: "$totalPrice" },
+        },
+      },
+    ]);
+
+    const totalEarning = result.length > 0 ? result[0].totalEarning : 0;
+
+    return res.status(200).json({ success: true, totalEarning });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+export const fetchBillingReportCSV = asyncHandler(async (req, res) => {
+  try {
+    const startDate = req.query.startDate
+      ? new Date(req.query.startDate)
+      : new Date();
+    const endDate = req.query.endDate
+      ? new Date(req.query.endDate)
+      : new Date();
+
+    // Fetch the billing data within the specified date range
+    const billings = await Billing.find({
+      billingDate: {
+        $gte: new Date(startDate.setHours(0, 0, 0, 0)),
+        $lt: new Date(endDate.setHours(23, 59, 59, 999)),
+      },
+    }).populate("item.product");
+
+    // Prepare the billing data for CSV conversion
+    const reportData = billings.map((bill) => ({
+      billingId: bill._id,
+      billingDate: bill.billingDate.toISOString().split("T")[0], // Formatting the date to YYYY-MM-DD
+      totalPrice: bill.totalPrice,
+      items: bill.item
+        .map((i) => `${i.product.name} (Quantity: ${i.quantity})`)
+        .join("; "), // Combining product names and quantities
+    }));
+
+    // Define the fields to include in the CSV
+    const fields = ["billingId", "billingDate", "totalPrice", "items"];
+    const json2csvParser = new Parser({ fields });
+    const csv = json2csvParser.parse(reportData);
+
+    // Set response headers for CSV download
+    res.header("Content-Type", "text/csv");
+    res.attachment("billing_report.csv");
+    return res.send(csv);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+    });
   }
 });
