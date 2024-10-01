@@ -119,3 +119,19 @@ export const getAllBillingWithPagination = asyncHandler(async (req, res) => {
     return res.status(500).json({ error, success: false });
   }
 });
+
+export const getLifetimeEarnings = asyncHandler(async (req, res) => {
+  try {
+    let totalEarning = 0;
+    const productDoc = await Product.find({});
+
+    for (let product of productDoc) {
+      totalEarning += product.grossRevenue;
+    }
+
+    return res.status(200).json({ success: true, totalEarning });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ success: false, error });
+  }
+});
