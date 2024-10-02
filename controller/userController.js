@@ -128,10 +128,32 @@ export const generateOtpAdminEmail = asyncHandler(async (req, res) => {
     userDoc.otp = otp;
     await userDoc.save();
     await sendEmail(
-      userDoc.email,
-      "Forget Password Otp",
-      `Please find the OTP below. \n ${otp}`
+      email,
+      "Password Reset",
+      `
+        <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 5px;">
+          <h2 style="text-align: center; color: #4CAF50;">Password Reset Request</h2>
+          <p style="font-size: 16px; line-height: 1.5;">
+            Hello,
+          </p>
+          <p style="font-size: 16px; line-height: 1.5;">
+            We received a request to reset your password. Use the OTP below to reset it. :
+          </p>
+          <div style="text-align: center; margin: 20px 0;">
+            <span style="display: inline-block; font-size: 18px; background-color: #f7f7f7; padding: 10px 20px; border-radius: 5px; border: 1px solid #ccc;">
+              ${otp}
+            </span>
+          </div>
+          <p style="font-size: 16px; line-height: 1.5;">
+            If you did not request a password reset, please ignore this email or contact support if you have questions.
+          </p>
+          <p style="font-size: 16px; line-height: 1.5;">
+            Thank you,<br/>The Edmentor Team
+          </p>
+        </div>
+      `
     );
+
     return res.status(200).json({
       success: true,
       userDoc,

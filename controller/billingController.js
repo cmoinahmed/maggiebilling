@@ -69,15 +69,16 @@ export const getBillingById = asyncHandler(async (req, res) => {
   try {
     const billId = req.params.billId;
 
-    const billDoc = await Billing.findById(billId);
+    const billDoc = await Billing.findById(billId)
+      .populate("item.product")
+      .exec();
+
     if (!billDoc) {
       console.log("Billing id does not exist");
       return res
         .status(404)
         .json({ success: false, msg: "Billing id not found" });
     }
-
-    await billDoc.populate("item.product");
 
     return res.status(200).json({ success: true, billDoc });
   } catch (error) {
@@ -90,16 +91,16 @@ export const getAllBillingWithPagination = asyncHandler(async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const pageSize = parseInt(req.query.pageSize) || 10;
-    //const sortField = req.query.sortField || "dateCreated";
-    //const sortOrder = req.query.sortOrder || "asc";
-    //const sort = {};
-    //sort[sortField] = sortOrder === "asc" ? 1 : -1;
+    const sortField = req.query.sortField || "dateCreated";
+    const sortOrder = req.query.sortOrder || "asc";
+    const sort = {};
+    sort[sortField] = sortOrder === "asc" ? 1 : -1;
     const startIndex = (page - 1) * pageSize;
     const totalDocuments = await Billing.countDocuments();
     const totalPages = Math.ceil(totalDocuments / pageSize);
     const billingDoc = await Billing.find({})
-      //.populate("product")
-      // .sort(sort)
+      .populate("item.product")
+      .sort(sort)
       .skip(startIndex)
       .limit(pageSize)
       .exec();
@@ -123,9 +124,6 @@ export const getAllBillingWithPagination = asyncHandler(async (req, res) => {
 
 export const getLifetimeEarnings = asyncHandler(async (req, res) => {
   try {
-    let totalEarning = 0;
-    //const productDoc = await Product.find({});
-
     const productDoc = await Product.aggregate([
       {
         $group: {
@@ -144,14 +142,13 @@ export const getLifetimeEarnings = asyncHandler(async (req, res) => {
 
 export const getTotalEarningsBetweenDates = asyncHandler(async (req, res) => {
   try {
-    let totalEarning = 0;
     const startDate = req.query.startDate;
     const endDate = req.query.endDate;
 
     const billingDoc = await Billing.aggregate([
       {
         $match: {
-          dateModified: { $gte: new Date(startDate), $lte: new Date(endDate) },
+          billingDate: { $gte: new Date(startDate), $lte: new Date(endDate) },
         },
       },
       {
@@ -177,7 +174,7 @@ export const getTodaysEarnings = asyncHandler(async (req, res) => {
     const result = await Billing.aggregate([
       {
         $match: {
-          dateModified: { $gte: startOfDay, $lte: endOfDay },
+          billingDate: { $gte: startOfDay, $lte: endOfDay },
         },
       },
       {

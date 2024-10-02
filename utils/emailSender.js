@@ -16,7 +16,7 @@ export const sendEmail = async (to, subject, text) => {
       from: "servicedesk@orbittechnologys.com",
       to,
       subject,
-      text,
+      html: text,
     });
     console.log("Email sent successfully");
   } catch (error) {
