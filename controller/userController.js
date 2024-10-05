@@ -148,7 +148,7 @@ export const generateOtpAdminEmail = asyncHandler(async (req, res) => {
             If you did not request a password reset, please ignore this email or contact support if you have questions.
           </p>
           <p style="font-size: 16px; line-height: 1.5;">
-            Thank you,<br/>The Edmentor Team
+            Thank you,<br/>The MAC Team
           </p>
         </div>
       `
@@ -241,7 +241,7 @@ export const updateUserStatus = asyncHandler(async (req, res) => {
 
 export const updateUser = asyncHandler(async (req, res) => {
   try {
-    const { userId, username, email, phone, role } = req.body;
+    const { userId, username, email, phone } = req.body;
 
     const existingUser = await User.findById(userId);
 
@@ -258,7 +258,6 @@ export const updateUser = asyncHandler(async (req, res) => {
         username,
         email,
         phone,
-        role,
       }
     );
 
