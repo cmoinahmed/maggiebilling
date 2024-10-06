@@ -128,13 +128,16 @@ export const getLifetimeEarnings = asyncHandler(async (req, res) => {
     const productDoc = await Product.aggregate([
       {
         $group: {
-          _id: null, // Group by nothing, so all documents are aggregated
+          _id: null,
           totalEarnings: { $sum: "$grossRevenue" },
         },
       },
     ]);
 
-    return res.status(200).json({ success: true, productDoc });
+    const totalEarnings =
+      productDoc.length > 0 ? productDoc[0].totalEarnings : 0;
+
+    return res.status(200).json({ success: true, totalEarnings });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ success: false, error });
