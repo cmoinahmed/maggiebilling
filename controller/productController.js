@@ -161,3 +161,61 @@ export const getProductRevenue = asyncHandler(async (req, res) => {
     return res.status(500).json({ success: false, error });
   }
 });
+
+export const highestSoldProduct = asyncHandler(async (req, res) => {
+  try {
+    const topProduct = await Product.findOne().sort({ productSold: -1 });
+
+    if (!topProduct) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No products found" });
+    }
+
+    const highestSales = topProduct.productSold;
+    const productsWithHighestSales = await Product.find({
+      productSold: highestSales,
+    });
+
+    return res.status(200).json({
+      success: true,
+      products: productsWithHighestSales,
+    });
+  } catch (error) {
+    console.error("Error fetching products with highest sales:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+});
+
+export const highestGrossRevenue = asyncHandler(async (req, res) => {
+  try {
+    const topGrossRevenue = await Product.findOne().sort({ grossRevenue: -1 });
+
+    if (!topGrossRevenue) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No products found" });
+    }
+
+    const highestGrossRevenue = topGrossRevenue.grossRevenue;
+    const productsWithHighestGrossRevenue = await Product.find({
+      grossRevenue: highestGrossRevenue,
+    });
+
+    return res.status(200).json({
+      success: true,
+      products: productsWithHighestGrossRevenue,
+    });
+  } catch (error) {
+    console.error("Error fetching products with highest sales:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
+});
