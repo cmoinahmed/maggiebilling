@@ -19,6 +19,6 @@ billingRouter
   .route("/getTotalEarningsBetweenDates")
   .get(getTotalEarningsBetweenDates);
 billingRouter.route("/getTodaysEarnings").get(getTodaysEarnings);
-billingRouter.route("/fetchBillingReportCSV").get(fetchBillingReportCSV);
+billingRouter.route("/downloadCSV").get(fetchBillingReportCSV);
 
 export default billingRouter;
