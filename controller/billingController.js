@@ -163,7 +163,10 @@ export const getTotalEarningsBetweenDates = asyncHandler(async (req, res) => {
       },
     ]);
 
-    return res.status(200).json({ success: true, billingDoc });
+    const totalEarnings =
+      billingDoc.length > 0 ? billingDoc[0].totalEarnings : 0;
+
+    return res.status(200).json({ success: true, totalEarnings });
   } catch (error) {
     console.log(error);
     return res.status(500).json({ success: false, error });
