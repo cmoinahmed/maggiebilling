@@ -219,3 +219,18 @@ export const highestGrossRevenue = asyncHandler(async (req, res) => {
     });
   }
 });
+
+export const getAllProductNames = asyncHandler(async (req, res) => {
+  try {
+    const products = await Product.find({}).select("name _id");
+    if (!products) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No products found" });
+    }
+    return res.status(200).json({ success: true, products });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ success: false, error });
+  }
+});
